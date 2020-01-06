@@ -1,0 +1,15 @@
+#Files and Directories
+
+processors: 5
+
+reference: 
+  class: Directory
+  location: /rgs01/project_space/abrahgrp/Software_Dev_Sandbox/common/madetunj/genomes/hg19/TOPHAT
+
+fastqfile: 
+  class: File
+  path: /rgs01/project_space/abrahgrp/Software_Dev_Sandbox/common/madetunj/fastqfiles/20190628_KOPTK1-DMSO-MYBL2_AD7124_S12_R1_001.fastq.gz
+
+blacklistfile:
+  class: File
+  path: /rgs01/project_space/abrahgrp/Software_Dev_Sandbox/common/madetunj/genomes/hg19/hg19-blacklist.v2.bed
