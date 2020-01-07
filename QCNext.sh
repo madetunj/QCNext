@@ -16,8 +16,8 @@ NEW_UUID=${NEW_UUID:=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 5 | head 
 #temporary output & error files
 out="$(pwd)/"$NEW_UUID"-outdir"
 tmp="$(pwd)/"$NEW_UUID"-tmpdir"
-logout="chipseq-"$NEW_UUID"-outfile_out"
-logerr="chipseq-"$NEW_UUID"-outfile_err"
+logout="qcnext-"$NEW_UUID"-outfile_out"
+logerr="qcnext-"$NEW_UUID"-outfile_err"
 
 #------
 ###Modules & PATH update
