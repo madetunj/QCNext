@@ -1,26 +1,17 @@
 #!/usr/bin/env bash
 #------
 ###SYNTAX to run
-#bsub -R "rusage[mem=10000]" -P watcher -q compbio -J qc-cwl -o qc-cwl_out -e qc-cwl_err -N ./QCNext.sh
+#bsub -R "rusage[mem=10000]" -P watcher -q compbio -J qc-cwl -o qc-cwl_out -e qc-cwl_err -N ./QCNextScatter.sh
 ####
 
 #------
 ###FILES
 #------
-#location of cwlfiles
-location="/rgs01/project_space/zhanggrp/MethodDevelopment/common/modupe-qc-easton"
-
-#configuration file
+location=$(pwd)
 config="$location/LSFqc.json"
-
-#input parameters yml file
-parameters=$1
-
-#CWL workflow
-firstscript="$location/workflows/QCNext.cwl"
-
-#temporary id tag
-NEW_UUID=${NEW_UUID:=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 5 | head -n 1)"_"`date +%s`}
+parameters="$location/parameter-qcnext.yml"
+firstscript="$location/workflows/QCNextScatter.cwl"
+NEW_UUID=${NEW_UUID:=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 5 | head -n 1)"_"`date +%s`} #temporary file for the 2nd step
 
 #temporary output & error files
 out="$(pwd)/"$NEW_UUID"-outdir"
@@ -55,14 +46,3 @@ export PATH=$PATH:$location/scripts
 echo "STATUS:  Temporary files named with $NEW_UUID"
 mkdir -p $tmp $out
 cwlexec -p -w $tmp -o $out -c $config -p $firstscript $parameters 1>$logout 2>$logerr
-
-#optional step
-# if workflow is sucessful, output specific files to specified folder
-if [ -s $logout ]
-then
-
-  perl $location/qcsummary.pl -i $logout -o $NEW_UUID.yml
-  
-fi
-
-echo "UPDATE: Completed $NEW_UUID"

@@ -1,0 +1,27 @@
+#!/usr/bin/perl
+# process outputfiles to specified folder for qc
+
+use strict;
+use JSON;
+use Getopt::Long;
+use Pod::Usage;
+use File::Basename;
+ 
+my ($help, $manual, $infile, $outfile, $json, $folder);
+
+GetOptions ("i|in=s"=>\$infile,"o|out=s"=>\$outfile, "f|folder=s"=>\$folder);
+my $usage = "perl $0 -i <log output file> -o <output file> -f <folder>\n";
+unless ( $infile ) { die $usage; }
+
+local $/; #Enable 'slurp' mode
+open my $fh, "<", $infile;
+$json = <$fh>;
+close $fh;
+my $data = decode_json($json);
+
+#output to desired folder
+unless ($folder) { $folder = (split("\_fastq", $data->{'readqc_zip'}->{'nameroot'}))[0];  }
+`mkdir -p $folder`;
+my $newpath = (fileparse($data->{'statsfile'}->{'path'}))[1];
+`cp -rf $newpath/*-stats* $folder`;
+`cp -rf $newpath/*fastqc* $folder`;

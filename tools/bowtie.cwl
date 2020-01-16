@@ -104,32 +104,21 @@ inputs:
       position: 8
 
   samfile:
-    type: string
-    inputBinding:
-      prefix: '>'
-      position: 9
-      valueFrom: |
-        ${
-            if (self == ""){
-              return var_output_name();
-            } else {
-              return self;
-            }
-        }
+    type: string?
     default: ""
+
+stdout: |
+  ${
+    if (inputs.samfile == "") {
+      return var_output_name();
+    } else {
+      return inputs.samfile;
+    }
+  }
 
 outputs:
   samfile:
-    type: File
-    outputBinding:
-      glob: |
-        ${
-          if (inputs.samfile == "") {
-            return var_output_name();
-          } else {
-            return inputs.samfile;
-          } 
-        }
+    type: stdout
 
 
 
