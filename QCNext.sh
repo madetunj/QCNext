@@ -60,9 +60,8 @@ cwlexec -p -w $tmp -o $out -c $config -p $firstscript $parameters 1>$logout 2>$l
 # if workflow is sucessful, output specific files to specified folder
 if [ -s $logout ]
 then
-
   perl $location/qcsummary.pl -i $logout -o $NEW_UUID.yml
-  
+  echo "UPDATE:  Completed $NEW_UUID"
+else
+  echo "ERROR:   Workflow failed"
 fi
-
-echo "UPDATE: Completed $NEW_UUID"
