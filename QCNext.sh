@@ -7,14 +7,14 @@
 #------
 ###FILES
 #------
-#location of cwlfiles
+#location of cwlfiles, change path to current working directory
 location="/rgs01/project_space/zhanggrp/MethodDevelopment/common/modupe-qc-easton"
 
 #configuration file
 config="$location/LSFqc.json"
 
 #input parameters yml file
-parameters=$1
+parameters="$location/parameter-qcnext.yml"
 
 #CWL workflow
 firstscript="$location/workflows/QCNext.cwl"
