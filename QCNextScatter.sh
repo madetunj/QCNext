@@ -9,7 +9,7 @@
 #------
 location=$(pwd)
 config="$location/LSFqc.json"
-parameters="$location/parameter-qcnext.yml"
+parameters="$location/parameter-qcnextscatter.yml"
 firstscript="$location/workflows/QCNextScatter.cwl"
 NEW_UUID=${NEW_UUID:=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 5 | head -n 1)"_"`date +%s`} #temporary file for the 2nd step
 
