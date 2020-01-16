@@ -7,8 +7,8 @@ reference:
   location: /rgs01/project_space/abrahgrp/Software_Dev_Sandbox/common/madetunj/genomes/hg19/TOPHAT
 
 fastqfile: 
-  class: File
-  path: /rgs01/project_space/abrahgrp/Software_Dev_Sandbox/common/madetunj/fastqfiles/20190628_KOPTK1-DMSO-MYBL2_AD7124_S12_R1_001.fastq.gz
+  - { class: File, path: /rgs01/project_space/abrahgrp/Software_Dev_Sandbox/common/madetunj/fastqfiles/20190628_KOPTK1-DMSO-MYBL2_AD7124_S12_R1_001.fastq.gz }
+  - { class: File, path: /rgs01/project_space/abrahgrp/Software_Dev_Sandbox/common/madetunj/fastqfiles/20190611_pL-EV_H3K27ac_MWZ7030_S2_R1_001.fastq.gz }
   
 blacklistfile:
   class: File

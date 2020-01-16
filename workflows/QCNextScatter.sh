@@ -4,10 +4,11 @@ class: Workflow
 
 requirements:
   - class: SubworkflowFeatureRequirement
+  - class: ScatterFeatureRequirement
 
 inputs:
   reference: Directory
-  fastqfile: File
+  fastqfile: File[]
   blacklistfile: File
   best_alignments: boolean?
   good_alignments: int?
@@ -80,6 +81,7 @@ steps:
       fastqfile: fastqfile
     out: [metrics_out]
     run: ../tools/basicfastqstats.cwl
+    scatter: fastqfile
 
   TagLen:
     in: 
@@ -92,6 +94,7 @@ steps:
       infile: fastqfile
     out: [htmlfile, zipfile]
     run: ../tools/fastqc.cwl
+    scatter: infile
 
   Bowtie:
     run: ../tools/bowtie.cwl
@@ -104,6 +107,7 @@ steps:
       processors: processors
       reference: reference
     out: [samfile]
+    scatter: fastqfile
 
   SamView:
     in:
