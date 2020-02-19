@@ -13,5 +13,11 @@
     "BasicMetrics": {
       "res_req": "rusage[mem=20000]",
     },
+    "SortBed": {
+      "res_req": "rusage[mem=10000]",
+    },
+    "runSPP": {
+      "res_req": "rusage[mem=10000]",
+    },
   },
 }
