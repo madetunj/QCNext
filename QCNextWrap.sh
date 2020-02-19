@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #------
 ###SYNTAX to run
-#bsub -R "rusage[mem=10000]" -P watcher -q compbio -J qc-cwl -o qc-cwl_out -e qc-cwl_err -N ./QCNextWrap.sh "input"
+#bsub -P watcher -q compbio -J qc-wrap -o wrap_out -e wrap_err -N ./QCNextWrap.sh <specify input folder location>
 ####
 
 #------
