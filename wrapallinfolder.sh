@@ -1,6 +1,7 @@
 #!/usr/bin/sh
 #To RUN
-#bash wrapallinfolder.sh <folder>
+#bsub -P watcher -q compbio -J wrap -o wrap_out -e wrap_err -N ./wrapallinfolder.sh <folder_path>
+
 #Modified to allow for multiple files
 
 numberoffile=0
