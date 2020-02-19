@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #------
 ###SYNTAX to run
-#bsub -R "rusage[mem=10000]" -P watcher -q compbio -J qc-cwl -o qc-cwl_out -e qc-cwl_err -N ./QCNext.sh
+#bsub -R "rusage[mem=10000]" -P watcher -q compbio -J qc-cwl -o qc-cwl_out -e qc-cwl_err -N ./QCNextWrap.sh "input"
 ####
 
 #------
@@ -14,7 +14,7 @@ location=$(pwd)
 config="$location/LSFqc.json"
 
 #input parameters yml file
-parameters="$location/parameter-qcnext.yml"
+parameters="$location/$1"
 
 #CWL workflow
 script="$location/workflows/QCNext.cwl"
@@ -58,7 +58,6 @@ cwlexec -p -w $tmp -o $out -c $config -p $script $parameters 1>$logout 2>$logerr
 if [ -s $logout ]
 then
   qcsummary.pl -i $logout
-  rm -rf *$NEW_UUID*
   echo "UPDATE:  Completed $NEW_UUID"
 else
   echo "ERROR:   Workflow failed"

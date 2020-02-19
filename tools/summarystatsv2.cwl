@@ -97,4 +97,4 @@ outputs:
   textfile:
     type: File
     outputBinding:
-    glob: '*stats.txt'
+      glob: '*stats.txt'

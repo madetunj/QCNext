@@ -49,6 +49,7 @@ cwlexec -p -w $tmp -o $out -c $config -p $script $parameters 1>$logout 2>$logerr
 if [ -s $logout ]
 then
   qcsummary.pl -i $logout
+  rm -rf *$NEW_UUID*
   echo "UPDATE:  Completed $NEW_UUID"
 else
   echo "ERROR:   Workflow failed"
