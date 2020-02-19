@@ -1,6 +1,6 @@
 #!/usr/bin/env cwl-runner
 cwlVersion: v1.0
-baseCommand: [ summaryfacts.pl ]
+baseCommand: [ summaryfactsv2.pl ]
 class: CommandLineTool
 label: QC on the peaks file
 doc: perl summaryfacts.pl -b <bam file> -p <peaks bed> -bamflag <bamflagstat> -rmdupflag <rmdupflagstat> -bkflag <bklistflagstat> -fqc <fastqczipfile> -outfile <outputfilename>
@@ -11,23 +11,27 @@ requirements:
   expressionLib:
   - var var_output_name = function() {
       if (inputs.outfile == ""){
-        if (inputs.peaksbed != null) { return inputs.peaksbed.nameroot+'-stats.out'; }
-        else if (inputs.bamflag != null) { return inputs.bamflag.nameroot+'-stats.out'; }
+        if (inputs.bamflag != null) { return inputs.bamflag.nameroot+'-stats.out'; }
         else if (inputs.rmdupflag != null) { return inputs.rmdupflag.nameroot+'-stats.out'; }
         else if (inputs.bkflag != null) { return inputs.bkflag.nameroot+'-stats.out'; }
       }
    };
 
 inputs:
-  bamfile:
+  bambed:
     type: File?
     inputBinding:
       prefix: -b
 
-  peaksbed:
+  sppfile:
     type: File?
     inputBinding:
-      prefix: -p
+      prefix: -s
+
+  countsfile:
+    type: File?
+    inputBinding:
+      prefix: -c
 
   peaksxls:
     type: File?
@@ -89,3 +93,8 @@ outputs:
     type: File
     outputBinding:
       glob: '*stats.html'
+
+  textfile:
+    type: File
+    outputBinding:
+    glob: '*stats.txt'

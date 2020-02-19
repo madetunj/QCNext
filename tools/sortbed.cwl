@@ -1,11 +1,11 @@
 #!/usr/bin/env cwl-runner
 cwlVersion: v1.0
-baseCommand: [intersectBed, -v]
+baseCommand: [sort-bed]
 class: CommandLineTool
 
-label: bedtools intersect, to remove blacklist
+label: Using bedops to sort bed file
 doc: |
-  intersectBed -v -a KOPTK1_DMSO.rmdup.bam -b ~/.genomes/hg19/hg19-blacklist.v2.bed > ooo
+  sort-bed <bed file> > <sorted bed file>
 
 requirements:
 - class: ShellCommandRequirement
@@ -14,7 +14,7 @@ requirements:
   expressionLib:
   - var var_output_name = function() {
       if (inputs.infile != null) {
-         return inputs.infile.nameroot.split('.bam')[0]+'.bklist.bam';
+         return inputs.infile.nameroot.split('.bed')[0]+'.sorted.bed';
       }
    };
 
@@ -22,16 +22,8 @@ inputs:
   infile:
     type: File
     inputBinding:
-      prefix: '-a'
       position: 1
   
-  blacklistfile:
-    type: File
-    inputBinding:
-      prefix: '-b'
-      position: 2
-
-
   outfile:
     type: string?
     default: ""

@@ -8,7 +8,7 @@ reference:
 
 fastqfile: 
   class: File
-  path: /rgs01/project_space/abrahgrp/Software_Dev_Sandbox/common/madetunj/fastqfiles/20190628_KOPTK1-DMSO-MYBL2_AD7124_S12_R1_001.fastq.gz
+  path: /research/dept/cmpb/genomicsLab/runs/NovaSeq/191007_A00641_0103_AHG3YMDRXX/Data/Intensities/BaseCalls/3D_Genome_Consortium_Baker/SJHGG063418_X2-L80p1m6945-H3K27Ac-AB5_S36_L002_R1_001.fastq.gz
   
 blacklistfile:
   class: File

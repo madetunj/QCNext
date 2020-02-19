@@ -24,59 +24,32 @@ inputs:
 
 outputs:
   statsfile:
-    type: File
+    type: File[]
     outputSource: PeaksQC/statsfile
 
   htmlfile:
-    type: File
+    type: File[]
     outputSource: PeaksQC/htmlfile
 
-  macsDir:
-    type: Directory
-    outputSource: MACS-Auto/macsDir
-
-  sam_sort:
-    outputSource: SamSort/outfile
-    type: File
-
-  fastq_metrics:
-    outputSource: BasicMetrics/metrics_out
-    type: File
-
-  rmdup_bam:
-    outputSource: SamRMDup/outfile
-    type: File
-
-  rmdup_index:
-    outputSource: SamIndex/outfile
-    type: File
-
-  bklist_bam:
-    outputSource: BkList/outfile
-    type: File
-
-  bklist_index: 
-    outputSource: BkIndex/outfile
-    type: File
+  textfile:
+    type: File[]
+    outputSource: PeaksQC/textfile
 
   readqc_zip:
     outputSource: ReadQC/zipfile
-    type: File
+    type: File[]
 
   readqc_html:
     outputSource: ReadQC/htmlfile
-    type: File
+    type: File[]
 
-  statsfile:
-    type: File
-    outputSource: PeaksQC/statsfile
 
-  htmlfile:
-    type: File
-    outputSource: PeaksQC/htmlfile    
-    
 steps:
   BasicMetrics:
+    requirements:
+      ResourceRequirement:
+        ramMax: 20000
+        coresMin: 1
     in: 
       fastqfile: fastqfile
     out: [metrics_out]
@@ -88,6 +61,7 @@ steps:
       datafile: BasicMetrics/metrics_out
     out: [tagLength]
     run: ../tools/taglength.cwl
+    scatter: datafile
    
   ReadQC:
     in:
@@ -97,6 +71,10 @@ steps:
     scatter: infile
 
   Bowtie:
+    requirements:
+      ResourceRequirement:
+        ramMax: 10000
+        coresMin: 5
     run: ../tools/bowtie.cwl
     in:
       readLengthFile: TagLen/tagLength
@@ -107,19 +85,22 @@ steps:
       processors: processors
       reference: reference
     out: [samfile]
-    scatter: fastqfile
+    scatter: [readLengthFile, fastqfile]
+    scatterMethod: dotproduct
 
   SamView:
     in:
       infile: Bowtie/samfile
     out: [outfile]
     run: ../tools/samtools-view.cwl
+    scatter: infile
 
   SamSort:
     in:
       infile: SamView/outfile
     out: [outfile]
     run: ../tools/samtools-sort.cwl
+    scatter: infile
 
   BkList:
     in:
@@ -127,62 +108,112 @@ steps:
       blacklistfile: blacklistfile
     out: [outfile]
     run: ../tools/blacklist.cwl
+    scatter: infile
 
   BkIndex:
     in:
       infile: BkList/outfile
-    out: [bam2file, outfile]
+    out: [outfile]
     run: ../tools/samtools-index.cwl
+    scatter: infile
 
   SamRMDup:
     in:
       infile: BkList/outfile
     out: [outfile]
     run: ../tools/samtools-mkdupr.cwl
-
-  SamIndex:
-    in:
-      infile: SamRMDup/outfile
-    out: [bam2file, outfile]
-    run: ../tools/samtools-index.cwl
+    scatter: infile
 
   STATbam:
     in:
       infile: SamView/outfile
     out: [outfile]
     run: ../tools/samtools-flagstat.cwl
+    scatter: infile
 
   STATrmdup:
     in:
       infile: SamRMDup/outfile
     out: [outfile]
     run: ../tools/samtools-flagstat.cwl
+    scatter: infile
 
   STATbk:
     in:
       infile: BkList/outfile
     out: [outfile]
     run: ../tools/samtools-flagstat.cwl
+    scatter: infile
 
-  MACS-Auto:
+  MACS:
+    requirements:
+      ResourceRequirement:
+        ramMax: 10000
+        coresMin: 1
     in:
-      treatmentfile: BkIndex/bam2file
+      treatmentfile: BkIndex/outfile
       space: space
       pvalue: pvalue
       wiggle: wiggle
       single_profile: single_profile
     out: [ peaksbedfile, peaksxlsfile, summitsfile, wigfile, macsDir ]
     run: ../tools/macs1call.cwl
+    scatter: treatmentfile
+
+  Bklist2Bed:
+    in:
+      infile: BkIndex/outfile
+    out: [ outfile ]
+    run: ../tools/bamtobed.cwl
+    scatter: infile
+
+  SortBed:
+    requirements:
+      ResourceRequirement:
+        ramMax: 10000
+        coresMin: 1
+    in:
+      infile: Bklist2Bed/outfile
+    out: [outfile]
+    run: ../tools/sortbed.cwl
+    scatter: infile
+
+  runSPP:
+    requirements:
+      ResourceRequirement:
+        ramMax: 10000
+        coresMin: 1
+    in:
+      infile: BkIndex/outfile
+    out: [spp_out]
+    run: ../tools/runSPP.cwl
+    scatter: infile
+
+  CountIntersectBed:
+    in:
+      peaksbed: MACS/peaksbedfile
+      bamtobed: SortBed/outfile
+    out: [outfile]
+    run: ../tools/intersectbed.cwl
+    scatter: [peaksbed, bamtobed]
+    scatterMethod: dotproduct
 
   PeaksQC:
+    requirements:
+      ResourceRequirement:
+        ramMax: 10000
+        coresMin: 1
     in:
       fastqmetrics: BasicMetrics/metrics_out
       fastqczip: ReadQC/zipfile
-      bamfile: BkList/outfile
-      peaksbed: MACS-Auto/peaksbedfile
-      peaksxls: MACS-Auto/peaksxlsfile
+      sppfile: runSPP/spp_out
+      bambed: Bklist2Bed/outfile
+      countsfile: CountIntersectBed/outfile
+      peaksxls: MACS/peaksxlsfile
       bamflag: STATbam/outfile
       rmdupflag: STATrmdup/outfile
       bkflag: STATbk/outfile
-    out: [ statsfile, htmlfile ]
-    run: ../tools/summarystats.cwl
+    out: [ statsfile, htmlfile, textfile ]
+    run: ../tools/summarystatsv2.cwl
+    scatter: [fastqmetrics, fastqczip, sppfile, bambed, countsfile, peaksxls, bamflag, rmdupflag, bkflag]
+    scatterMethod: dotproduct

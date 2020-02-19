@@ -7,10 +7,10 @@ use Getopt::Long;
 use Pod::Usage;
 use File::Basename;
  
-my ($help, $manual, $infile, $outfile, $json, $folder);
+my ($help, $manual, $infile, $json, $folder, $newpath);
 
-GetOptions ("i|in=s"=>\$infile,"o|out=s"=>\$outfile, "f|folder=s"=>\$folder);
-my $usage = "perl $0 -i <log output file> -o <output file> -f <folder>\n";
+GetOptions ("i|in=s"=>\$infile);
+my $usage = "perl $0 -i <log output file>\n";
 unless ( $infile ) { die $usage; }
 
 local $/; #Enable 'slurp' mode
@@ -22,6 +22,6 @@ my $data = decode_json($json);
 #output to desired folder
 unless ($folder) { $folder = (split("\_fastq", $data->{'readqc_zip'}->{'nameroot'}))[0];  }
 `mkdir -p $folder`;
-my $newpath = (fileparse($data->{'statsfile'}->{'path'}))[1];
+$newpath = (fileparse($data->{'statsfile'}->{'path'}))[1];
 `cp -rf $newpath/*-stats* $folder`;
 `cp -rf $newpath/*fastqc* $folder`;

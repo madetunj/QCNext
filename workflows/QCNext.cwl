@@ -30,33 +30,9 @@ outputs:
     type: File
     outputSource: PeaksQC/htmlfile
 
-  macsDir:
-    type: Directory
-    outputSource: MACS-Auto/macsDir
-
-  sam_sort:
-    outputSource: SamSort/outfile
+  textfile:
     type: File
-
-  fastq_metrics:
-    outputSource: BasicMetrics/metrics_out
-    type: File
-
-  rmdup_bam:
-    outputSource: SamRMDup/outfile
-    type: File
-
-  rmdup_index:
-    outputSource: SamIndex/outfile
-    type: File
-
-  bklist_bam:
-    outputSource: BkList/outfile
-    type: File
-
-  bklist_index: 
-    outputSource: BkIndex/outfile
-    type: File
+    outputSource: PeaksQC/textfile
 
   readqc_zip:
     outputSource: ReadQC/zipfile
@@ -66,16 +42,13 @@ outputs:
     outputSource: ReadQC/htmlfile
     type: File
 
-  statsfile:
-    type: File
-    outputSource: PeaksQC/statsfile
 
-  htmlfile:
-    type: File
-    outputSource: PeaksQC/htmlfile    
-    
 steps:
   BasicMetrics:
+    requirements:
+      ResourceRequirement:
+        ramMax: 20000
+        coresMin: 1
     in: 
       fastqfile: fastqfile
     out: [metrics_out]
@@ -94,6 +67,10 @@ steps:
     run: ../tools/fastqc.cwl
 
   Bowtie:
+    requirements:
+      ResourceRequirement:
+        ramMax: 10000
+        coresMin: 5
     run: ../tools/bowtie.cwl
     in:
       readLengthFile: TagLen/tagLength
@@ -127,7 +104,7 @@ steps:
   BkIndex:
     in:
       infile: BkList/outfile
-    out: [bam2file, outfile]
+    out: [outfile]
     run: ../tools/samtools-index.cwl
 
   SamRMDup:
@@ -135,12 +112,6 @@ steps:
       infile: BkList/outfile
     out: [outfile]
     run: ../tools/samtools-mkdupr.cwl
-
-  SamIndex:
-    in:
-      infile: SamRMDup/outfile
-    out: [bam2file, outfile]
-    run: ../tools/samtools-index.cwl
 
   STATbam:
     in:
@@ -160,9 +131,13 @@ steps:
     out: [outfile]
     run: ../tools/samtools-flagstat.cwl
 
-  MACS-Auto:
+  MACS:
+    requirements:
+      ResourceRequirement:
+        ramMax: 10000
+        coresMin: 1
     in:
-      treatmentfile: BkIndex/bam2file
+      treatmentfile: BkIndex/outfile
       space: space
       pvalue: pvalue
       wiggle: wiggle
@@ -170,15 +145,53 @@ steps:
     out: [ peaksbedfile, peaksxlsfile, summitsfile, wigfile, macsDir ]
     run: ../tools/macs1call.cwl
 
+  Bklist2Bed:
+    in:
+      infile: BkIndex/outfile
+    out: [ outfile ]
+    run: ../tools/bamtobed.cwl
+
+  SortBed:
+    requirements:
+      ResourceRequirement:
+        ramMax: 10000
+        coresMin: 1
+    in:
+      infile: Bklist2Bed/outfile
+    out: [outfile]
+    run: ../tools/sortbed.cwl
+
+  runSPP:
+    requirements:
+      ResourceRequirement:
+        ramMax: 10000
+        coresMin: 1
+    in:
+      infile: BkIndex/outfile
+    out: [spp_out]
+    run: ../tools/runSPP.cwl
+
+  CountIntersectBed:
+    in:
+      peaksbed: MACS/peaksbedfile
+      bamtobed: SortBed/outfile
+    out: [outfile]
+    run: ../tools/intersectbed.cwl
+
   PeaksQC:
+    requirements:
+      ResourceRequirement:
+        ramMax: 10000
+        coresMin: 1
     in:
       fastqmetrics: BasicMetrics/metrics_out
       fastqczip: ReadQC/zipfile
-      bamfile: BkList/outfile
-      peaksbed: MACS-Auto/peaksbedfile
-      peaksxls: MACS-Auto/peaksxlsfile
+      sppfile: runSPP/spp_out
+      bambed: Bklist2Bed/outfile
+      countsfile: CountIntersectBed/outfile
+      peaksxls: MACS/peaksxlsfile
       bamflag: STATbam/outfile
       rmdupflag: STATrmdup/outfile
       bkflag: STATbk/outfile
-    out: [ statsfile, htmlfile ]
-    run: ../tools/summarystats.cwl
+    out: [ statsfile, htmlfile, textfile ]
+    run: ../tools/summarystatsv2.cwl
