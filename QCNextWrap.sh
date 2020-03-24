@@ -22,9 +22,15 @@ mkdir -p FinalOutput
 
 for eachfile in $(ls -1 $folderlocation/*gz)
 do 
-
+count=5
 jobcheck=$(bjobs -w | grep $NEW_UUID | wc -l)
-while [ $jobcheck -le 10 ]; do
+
+while [ $jobcheck -gt $count ]; do
+jobcheck=$(bjobs -w | grep $NEW_UUID | wc -l)
+sleep 5m
+done
+
+while [ $jobcheck -le $count ]; do
 
 echo "Processing this file: $eachfile"
 numberoffile=$(echo "$numberoffile+1" | bc)
