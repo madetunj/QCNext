@@ -14,7 +14,9 @@ location=$(pwd)
 config="$location/LSFqc.json"
 
 #input parameters yml file
-parameters="$location/parameter-qcnext.yml"
+parameterfile=$1
+parameterfile=${parameterfile:=parameter-qcnext.yml}
+parameters="$location/$parameterfile"
 
 #CWL workflow
 script="$location/workflows/QCNext.cwl"

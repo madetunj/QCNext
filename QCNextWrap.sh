@@ -1,64 +1,50 @@
-#!/usr/bin/env bash
-#------
-###SYNTAX to run
-#bsub -P watcher -q compbio -J qc-wrap -o wrap_out -e wrap_err -N ./QCNextWrap.sh <specify input folder location>
-####
+#!/usr/bin/sh
+#To RUN
+#bsub -P watcher -q compbio -J wrap -o wrap_out -e wrap_err -N ./QCNextWrap.sh <folder_path>
 
-#------
-###FILES
-#------
-#location of cwlfiles, change path to current working directory
-location=$(pwd)
+#Modified to allow for multiple files
 
-#configuration file
-config="$location/LSFqc.json"
+numberoffile=0
+folderlocation=$1
+#"/research/dept/cmpb/genomicsLab/runs/NovaSeq/191007_A00641_0103_AHG3YMDRXX/Data/Intensities/BaseCalls/3D_Genome_Consortium_Baker"
+ffran="fastqfileran.txt"
+WRAPPERSCRIPT="$(pwd)/QCNext.sh"
+finaloutput="AllOutputFromFolder.txt"
+finalfolder="FinalFolder"
+NEW_UUID=${NEW_UUID:=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 6 | head -n 1)}
 
-#input parameters yml file
-parameters="$location/$1"
+echo $numberoffile > $ffran
+echo "Working on Location: "$folderlocation > $ffran
 
-#CWL workflow
-script="$location/workflows/QCNext.cwl"
+#Parsing each file
+mkdir -p ymls
+mkdir -p FinalOutput
 
-#temporary id tag
-NEW_UUID=${NEW_UUID:=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 5 | head -n 1)"_"`date +%s`}
+for eachfile in $(ls -1 $folderlocation/*gz)
+do 
 
-#temporary output & error files
-out="$(pwd)/qcnext-"$NEW_UUID"-outdir"
-tmp="$(pwd)/qcnext-"$NEW_UUID"-tmpdir"
-logout="qcnext-"$NEW_UUID"-outfile_out"
-logerr="qcnext-"$NEW_UUID"-outfile_err"
+jobcheck=$(bjobs -w | grep $NEW_UUID | wc -l)
+while [ $jobcheck -le 10 ]; do
 
-#------
-###Modules & PATH update
-#------
-module load /rgs01/project_space/zhanggrp/MethodDevelopment/common/CWL/modulefiles/cwlexec/latest
-module load node
-module load fastqc/0.11.5
-module load bowtie/1.2.2
-module unload samtools
-module load samtools/1.9
-module load macs/041014
-module load R/3.6.1
-module load bedtools/2.25.0
-module load bedops/2.4.2
-module load java/1.8.0_60
+echo "Processing this file: $eachfile"
+numberoffile=$(echo "$numberoffile+1" | bc)
+cp preparameters.yml ymls/inputyml$numberoffile.yml
+echo "  path: $eachfile" >> ymls/inputyml$numberoffile.yml
+echo "$numberoffile.  $eachfile" >> $ffran
+echo "bsub -R "rusage[mem=10000]" -P watcher -q compbio -J $NEW_UUID-qcwrap$numberoffile -o qc-out$numberoffile -e qc-err$numberoffile -N $WRAPPERSCRIPT ymls/inputyml$numberoffile.yml"
+bsub -R "rusage[mem=10000]" -P watcher -q compbio -J $NEW_UUID-qcwrap$numberoffile -o qc-out$numberoffile -e qc-err$numberoffile -N $WRAPPERSCRIPT ymls/inputyml$numberoffile.yml
+NEWFOLDER=${eachfile%.*.*}
+header=$(head -n 1 $NEWFOLDER/*stats.txt)
+results=$results"\n"$(tail -n 1 $NEWFOLDER/*stats.txt)
+mv $NEWFOLDER $finalfolder/
 
-export PATH=$PATH:$location/scripts
+jobcheck=$(bjobs -w | grep $NEW_UUID | wc -l)
+done
 
-#------
-###WORKFLOW
-#------
-##cwlexec 1st step
-echo "STATUS:  Temporary files named with $NEW_UUID"
-mkdir -p $tmp $out
-cwlexec -p -w $tmp -o $out -c $config -p $script $parameters 1>$logout 2>$logerr
+done
 
-#optional step
-# if workflow is sucessful, output specific files to specified folder
-if [ -s $logout ]
-then
-  qcsummary.pl -i $logout
-  echo "UPDATE:  Completed $NEW_UUID"
-else
-  echo "ERROR:   Workflow failed"
-fi
+echo $header > $finaloutput
+echo -e $results | tail -n +2 >> $finaloutput
+
+echo "Text file for all results are found in: $finaloutput"
+echo "Output folders are in: $finalfolder"
