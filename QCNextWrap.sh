@@ -7,11 +7,11 @@
 numberoffile=0
 folderlocation=$1
 #"/research/dept/cmpb/genomicsLab/runs/NovaSeq/191007_A00641_0103_AHG3YMDRXX/Data/Intensities/BaseCalls/3D_Genome_Consortium_Baker"
-ffran="fastqfileran.txt"
-WRAPPERSCRIPT="$(pwd)/QCNext.sh"
-finaloutput="AllOutputFromFolder.txt"
-finalfolder="FinalFolder"
 NEW_UUID=${NEW_UUID:=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 6 | head -n 1)}
+ffran="fastqfileran-$NEW_UUID.txt"
+WRAPPERSCRIPT="$(pwd)/QCNext.sh"
+finaloutput="AllOutputFromFolder-$NEW_UUID.txt"
+finalfolder="FinalFolder-$NEW_UUID"
 
 echo $numberoffile > $ffran
 echo "Working on Location: "$folderlocation > $ffran
@@ -22,12 +22,12 @@ mkdir -p FinalOutput
 
 for eachfile in $(ls -1 $folderlocation/*gz)
 do 
-count=5
+count=2
 jobcheck=$(bjobs -w | grep $NEW_UUID | wc -l)
 
 while [ $jobcheck -gt $count ]; do
 jobcheck=$(bjobs -w | grep $NEW_UUID | wc -l)
-sleep 5m
+sleep 2m
 done
 
 while [ $jobcheck -le $count ]; do
@@ -39,14 +39,21 @@ echo "  path: $eachfile" >> ymls/inputyml$numberoffile.yml
 echo "$numberoffile.  $eachfile" >> $ffran
 echo "bsub -R "rusage[mem=10000]" -P watcher -q compbio -J $NEW_UUID-qcwrap$numberoffile -o qc-out$numberoffile -e qc-err$numberoffile -N $WRAPPERSCRIPT ymls/inputyml$numberoffile.yml"
 bsub -R "rusage[mem=10000]" -P watcher -q compbio -J $NEW_UUID-qcwrap$numberoffile -o qc-out$numberoffile -e qc-err$numberoffile -N $WRAPPERSCRIPT ymls/inputyml$numberoffile.yml
-NEWFOLDER=${eachfile%.*.*}
-header=$(head -n 1 $NEWFOLDER/*stats.txt)
-results=$results"\n"$(tail -n 1 $NEWFOLDER/*stats.txt)
-mv $NEWFOLDER $finalfolder/
 
 jobcheck=$(bjobs -w | grep $NEW_UUID | wc -l)
 done
 
+done
+
+#parsing all the stats files
+for eachfile in $(ls -1 $folderlocation/*gz)
+do 
+NEWFOLDER=${eachfile##*/}
+print $NEWFOLDER
+NEWFOLDER=${NEWFOLDER%.*.*}
+header=$(head -n 1 $NEWFOLDER/*stats.txt)
+results=$results"\n"$(tail -n 1 $NEWFOLDER/*stats.txt)
+mv $NEWFOLDER $finalfolder/
 done
 
 echo $header > $finaloutput

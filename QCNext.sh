@@ -46,6 +46,7 @@ module load bedops/2.4.2
 module load java/1.8.0_60
 
 export PATH=$PATH:$location/scripts
+export R_LIBS_USER=$R_LIBS_USER:$location/R #to find SPP local package
 
 #------
 ###WORKFLOW
