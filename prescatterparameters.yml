@@ -8,5 +8,4 @@ blacklistfile:
   class: File
   path: /rgs01/project_space/zhanggrp/MethodDevelopment/common/modupe-qc-easton/genomes/hg19/hg19-blacklist.v2.bed
 
-fastqfile:
-  class: File
+
