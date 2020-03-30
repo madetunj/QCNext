@@ -4,7 +4,7 @@
   "res_req": "span[hosts=1] select[rhel7]",
   "steps": {
     "Bowtie": {
-      "processors" : "5",
+      "processors" : "20",
       "res_req": "rusage[mem=10000]",
     },
     "PeaksQC": {

@@ -70,7 +70,7 @@ steps:
     requirements:
       ResourceRequirement:
         ramMax: 10000
-        coresMin: 5
+        coresMin: 20
     run: ../tools/bowtie.cwl
     in:
       readLengthFile: TagLen/tagLength

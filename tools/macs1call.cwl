@@ -112,9 +112,25 @@ inputs:
     inputBinding:
       position: 1000 
       shellQuote: false
-      prefix: '" && mkdir -p $nameoffolder && mv *_p*_kd-* $nameoffolder' 
+      prefix: '" && mkdir -p $nameoffolder &&'
     default: true
 
+  verifymove2:
+    type: string?
+    inputBinding:
+      position: 1001
+      shellQuote: false
+      separate: false
+      prefix: 'mv '
+      valueFrom: |
+        ${
+            if (self == ""){
+              return inputs.treatmentfile.basename.split('.').slice(0,-1).join('.')+'_p'+inputs.pvalue.split('-').slice(1)+'_kd-'+inputs.keep_dup+'* $nameoffolder';
+            } else {
+              return self;
+            }
+        }
+    default: ""
 
 outputs:
   peaksbedfile:
