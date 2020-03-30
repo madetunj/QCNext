@@ -1,7 +1,5 @@
 #Files and Directories
 
-processors: 5
-
 reference: 
   class: Directory
   location: /rgs01/project_space/zhanggrp/MethodDevelopment/common/modupe-qc-easton/genomes/hg19/TOPHAT
