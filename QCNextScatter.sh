@@ -74,7 +74,6 @@ export PATH=$PATH:$location/scripts
 ##cwlexec 1st step
 echo "STATUS:  Temporary files named with $NEW_UUID"
 mkdir -p $tmp $out
-#cwlexec -p -w $tmp -o $out -c $config -p $script $parameters 1>$logout 2>$logerr
 
 rm -rf $jobstore $logtxt
 toil-cwl-runner --batchSystem=lsf \
@@ -92,13 +91,9 @@ $script $parameters 1>$logout 2>$logerr
 # if workflow is sucessful, output specific files to specified folder
 if [ -s $logout ]
 then
-  for textfile in $(ls -1 $out/*stats.txt); do
-    header=$(head -n 1 $textfile)
-    results=$results"\n"$(tail -n 1 $textfile)
-  done
-
-  echo -e $header > $finaloutput
-  echo -e $results | tail -n +2 >> $finaloutput
+  cat $out/*stats.txt | head -n 1 > $finaloutput
+  header=$(cat $out/*stats.txt | head -n 1)
+  cat $out/*stats.txt | grep -v "$header" >> $finaloutput
 
   echo "All $numberoffile fastq results can be found in: $finaloutput"
   echo "Output files are in : $out"
