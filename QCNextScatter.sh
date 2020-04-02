@@ -11,9 +11,6 @@
 #location of cwlfiles, change path to current working directory
 location=$(pwd)
 
-#configuration file
-config="$location/LSFqc.json"
-
 #template parameters file
 preparameters="$location/prescatterparameters.yml"
 
@@ -60,7 +57,6 @@ done
 #------
 ###Modules & PATH update
 #------
-module load /rgs01/project_space/zhanggrp/MethodDevelopment/common/CWL/modulefiles/cwlexec/latest
 module load node
 module load fastqc/0.11.5
 module load bowtie/1.2.2
