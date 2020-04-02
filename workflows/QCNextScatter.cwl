@@ -74,7 +74,7 @@ steps:
     requirements:
       ResourceRequirement:
         ramMax: 10000
-        coresMin: 5
+        coresMin: 20
     run: ../tools/bowtie.cwl
     in:
       readLengthFile: TagLen/tagLength
@@ -190,6 +190,10 @@ steps:
     scatter: infile
 
   CountIntersectBed:
+    requirements:
+      ResourceRequirement:
+        ramMax: 10000
+        coresMin: 1
     in:
       peaksbed: MACS/peaksbedfile
       bamtobed: SortBed/outfile

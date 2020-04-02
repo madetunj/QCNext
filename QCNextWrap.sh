@@ -67,7 +67,7 @@ tail -n 1 $NEWFOLDER/*stats.txt >> $finaloutput.temp
 mv $NEWFOLDER $finalfolder/
 done
 
-echo $header > $finaloutput
+echo -e $header > $finaloutput
 cat $finaloutput.temp >> $finaloutput
 rm -rf $finaloutput.temp
 mv $NEW_UUID-qc-* $finalfolder/
