@@ -8,7 +8,7 @@
 ###FILES
 #------
 #location of cwlfiles, change path to current working directory
-location=$(pwd)
+location="/research/rgs01/project_space/zhanggrp/MethodDevelopment/common/modupe-qc-easton"
 
 #configuration file
 config="$location/LSFqc.json"
