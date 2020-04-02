@@ -172,6 +172,10 @@ steps:
     run: ../tools/runSPP.cwl
 
   CountIntersectBed:
+    requirements:
+      ResourceRequirement:
+        ramMax: 10000
+        coresMin: 1
     in:
       peaksbed: MACS/peaksbedfile
       bamtobed: SortBed/outfile
