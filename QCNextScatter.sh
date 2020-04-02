@@ -9,7 +9,7 @@
 ###FILES
 #------
 #location of cwlfiles, change path to current working directory
-location=$(pwd)
+location="/research/rgs01/project_space/zhanggrp/MethodDevelopment/common/modupe-qc-easton"
 
 #template parameters file
 preparameters="$location/prescatterparameters.yml"
@@ -51,8 +51,6 @@ do
 numberoffile=$(echo "$numberoffile+1" | bc)
 echo "  - { class: File, path: $eachfile }" >> $parameters
 done
-
-#parameters="$location/parameter-qcnextscatter.yml"
 
 #------
 ###Modules & PATH update
